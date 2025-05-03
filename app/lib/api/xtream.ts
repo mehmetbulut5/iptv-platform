@@ -44,19 +44,17 @@ class XtreamService {
   setCredentials(credentials: XtreamCredentials): void {
     const { serverUrl, username, password } = credentials;
     
+    // Always use the provided credentials
+    this.username = username;
+    this.password = password;
+    
     // Use mock API if in development mode or if NEXT_PUBLIC_USE_MOCK_API is true
     if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
       console.log('Using mock API');
       this.baseUrl = '/api/mock';
-      
-      // Use environment variables for credentials if available
-      this.username = process.env.NEXT_PUBLIC_XTREAM_USERNAME || username;
-      this.password = process.env.NEXT_PUBLIC_XTREAM_PASSWORD || password;
     } else {
       // Remove trailing slash if present
       this.baseUrl = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
-      this.username = username;
-      this.password = password;
     }
   }
 

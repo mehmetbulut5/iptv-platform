@@ -27,14 +27,8 @@ export async function GET(request: NextRequest) {
     return handleStreamRequest(streamId, streamType);
   }
   
-  // Accept any credentials in development mode
-  if (process.env.NODE_ENV === 'development' || (username && password)) {
-    // Credentials provided or in development mode, proceed with mock data
-    console.log('Mock API: Using credentials', { username: username || 'development_mode' });
-  } else {
-    // No credentials provided in production
-    return NextResponse.json({ user_info: { auth: 0, status: 'Invalid credentials' } });
-  }
+  // Always accept credentials in mock API
+  console.log('Mock API: Using credentials', { username: username || 'mock_user' });
   
   // Handle different API actions
   switch (action) {

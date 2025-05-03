@@ -9,8 +9,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'URL parameter is required' }, { status: 400 });
   }
 
-  // In development mode, always use the mock API
-  if (process.env.NODE_ENV === 'development') {
+  // Check if the URL is pointing to our mock API
+  if (url.includes('/api/mock')) {
     return redirectToMockApi(request, url);
   }
 
