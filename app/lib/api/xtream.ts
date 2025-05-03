@@ -104,8 +104,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_live_categories');
-      const response = await axios.get<XtreamLiveCategory[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{categories: XtreamLiveCategory[]}>(proxyUrl);
+      return response.data.categories || [];
     } catch (error) {
       console.error('Error fetching live categories:', error);
       throw new Error('Failed to fetch live categories');
@@ -122,8 +122,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_live_streams', { category_id: categoryId });
-      const response = await axios.get<XtreamLiveStream[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{streams: XtreamLiveStream[]}>(proxyUrl);
+      return response.data.streams || [];
     } catch (error) {
       console.error(`Error fetching live streams for category ${categoryId}:`, error);
       throw new Error(`Failed to fetch live streams for category ${categoryId}`);
@@ -140,8 +140,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_live_streams');
-      const response = await axios.get<XtreamLiveStream[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{streams: XtreamLiveStream[]}>(proxyUrl);
+      return response.data.streams || [];
     } catch (error) {
       console.error('Error fetching all live streams:', error);
       throw new Error('Failed to fetch all live streams');
@@ -158,8 +158,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_vod_categories');
-      const response = await axios.get<XtreamMovieCategory[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{categories: XtreamMovieCategory[]}>(proxyUrl);
+      return response.data.categories || [];
     } catch (error) {
       console.error('Error fetching movie categories:', error);
       throw new Error('Failed to fetch movie categories');
@@ -176,8 +176,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_vod_streams', { category_id: categoryId });
-      const response = await axios.get<XtreamMovie[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{movies: XtreamMovie[]}>(proxyUrl);
+      return response.data.movies || [];
     } catch (error) {
       console.error(`Error fetching movies for category ${categoryId}:`, error);
       throw new Error(`Failed to fetch movies for category ${categoryId}`);
@@ -194,8 +194,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_vod_streams');
-      const response = await axios.get<XtreamMovie[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{movies: XtreamMovie[]}>(proxyUrl);
+      return response.data.movies || [];
     } catch (error) {
       console.error('Error fetching all movies:', error);
       throw new Error('Failed to fetch all movies');
@@ -230,8 +230,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_series_categories');
-      const response = await axios.get<XtreamSeriesCategory[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{categories: XtreamSeriesCategory[]}>(proxyUrl);
+      return response.data.categories || [];
     } catch (error) {
       console.error('Error fetching series categories:', error);
       throw new Error('Failed to fetch series categories');
@@ -248,8 +248,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_series', { category_id: categoryId });
-      const response = await axios.get<XtreamSeries[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{series: XtreamSeries[]}>(proxyUrl);
+      return response.data.series || [];
     } catch (error) {
       console.error(`Error fetching series for category ${categoryId}:`, error);
       throw new Error(`Failed to fetch series for category ${categoryId}`);
@@ -266,8 +266,8 @@ class XtreamService {
 
     try {
       const proxyUrl = this.createProxyUrl('get_series');
-      const response = await axios.get<XtreamSeries[]>(proxyUrl);
-      return response.data;
+      const response = await axios.get<{series: XtreamSeries[]}>(proxyUrl);
+      return response.data.series || [];
     } catch (error) {
       console.error('Error fetching all series:', error);
       throw new Error('Failed to fetch all series');

@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(mockUserInfo);
       
     case 'get_live_categories':
-      return NextResponse.json(mockLiveCategories);
+      return NextResponse.json({ categories: mockLiveCategories });
       
     case 'get_live_streams':
       const liveCategoryId = searchParams.get('category_id');
@@ -52,12 +52,12 @@ export async function GET(request: NextRequest) {
         const filteredStreams = mockLiveStreams.filter(
           stream => stream.category_id === liveCategoryId
         );
-        return NextResponse.json(filteredStreams);
+        return NextResponse.json({ streams: filteredStreams });
       }
-      return NextResponse.json(mockLiveStreams);
+      return NextResponse.json({ streams: mockLiveStreams });
       
     case 'get_vod_categories':
-      return NextResponse.json(mockMovieCategories);
+      return NextResponse.json({ categories: mockMovieCategories });
       
     case 'get_vod_streams':
       const movieCategoryId = searchParams.get('category_id');
@@ -66,9 +66,9 @@ export async function GET(request: NextRequest) {
         const filteredMovies = mockMovies.filter(
           movie => movie.category_id === movieCategoryId
         );
-        return NextResponse.json(filteredMovies);
+        return NextResponse.json({ movies: filteredMovies });
       }
-      return NextResponse.json(mockMovies);
+      return NextResponse.json({ movies: mockMovies });
       
     case 'get_vod_info':
       const vodId = searchParams.get('vod_id');
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(movie || {});
       
     case 'get_series_categories':
-      return NextResponse.json(mockSeriesCategories);
+      return NextResponse.json({ categories: mockSeriesCategories });
       
     case 'get_series':
       const seriesCategoryId = searchParams.get('category_id');
@@ -85,9 +85,9 @@ export async function GET(request: NextRequest) {
         const filteredSeries = mockSeries.filter(
           series => series.category_id === seriesCategoryId
         );
-        return NextResponse.json(filteredSeries);
+        return NextResponse.json({ series: filteredSeries });
       }
-      return NextResponse.json(mockSeries);
+      return NextResponse.json({ series: mockSeries });
       
     case 'get_series_info':
       const seriesId = searchParams.get('series_id');
