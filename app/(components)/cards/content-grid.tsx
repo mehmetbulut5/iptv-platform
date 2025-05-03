@@ -29,6 +29,11 @@ export function ContentGrid({
     (!movies || movies.length === 0) && 
     (!series || series.length === 0) && 
     !children;
+    
+  // Ensure we have arrays for all content types
+  const streams = liveStreams || [];
+  const moviesList = movies || [];
+  const seriesList = series || [];
   
   return (
     <div className="space-y-4">
@@ -56,7 +61,7 @@ export function ContentGrid({
         // Content grid
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {/* Live streams */}
-          {liveStreams?.map((stream) => (
+          {streams.map((stream) => (
             <ContentCard
               key={`live-${stream.stream_id}`}
               id={stream.stream_id.toString()}
@@ -71,7 +76,7 @@ export function ContentGrid({
           ))}
           
           {/* Movies */}
-          {movies?.map((movie) => (
+          {moviesList.map((movie) => (
             <ContentCard
               key={`movie-${movie.stream_id}`}
               id={movie.stream_id.toString()}
@@ -87,7 +92,7 @@ export function ContentGrid({
           ))}
           
           {/* Series */}
-          {series?.map((show) => (
+          {seriesList.map((show) => (
             <ContentCard
               key={`series-${show.series_id}`}
               id={show.series_id.toString()}

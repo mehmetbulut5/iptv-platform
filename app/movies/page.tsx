@@ -81,7 +81,7 @@ export default function MoviesPage() {
       try {
         if (selectedCategory === 'all') {
           // Load all movies if not already loaded
-          if (movies.length === 0 && !isLoadingMovies) {
+          if (!movies['all'] && !isLoadingMovies) {
             setLoadingMovies(true);
             const moviesData = await xtreamService.getMovies();
             
@@ -100,32 +100,34 @@ export default function MoviesPage() {
               };
             });
             
-            setMovies(enhancedMovies);
+            setMovies('all', enhancedMovies);
             setLoadingMovies(false);
           }
         } else {
           // Load movies for selected category
-          setLoadingMovies(true);
-          const categoryId = parseInt(selectedCategory);
-          const moviesData = await xtreamService.getMoviesByCategory(categoryId);
-          
-          // Enhance movies with favorite status and watch progress
-          const enhancedMovies: EnhancedMovie[] = moviesData.map(movie => {
-            const watchProgress = watchHistory.find(
-              item => item.id === movie.stream_id.toString() && item.type === 'movie'
-            );
+          if (!movies[selectedCategory]) {
+            setLoadingMovies(true);
+            const categoryId = parseInt(selectedCategory);
+            const moviesData = await xtreamService.getMoviesByCategory(categoryId);
             
-            return {
-              ...movie,
-              isFavorite: favorites.some(fav => 
-                fav.id === movie.stream_id.toString() && fav.type === 'movie'
-              ),
-              watchProgress: watchProgress || null,
-            };
-          });
-          
-          setMovies(enhancedMovies);
-          setLoadingMovies(false);
+            // Enhance movies with favorite status and watch progress
+            const enhancedMovies: EnhancedMovie[] = moviesData.map(movie => {
+              const watchProgress = watchHistory.find(
+                item => item.id === movie.stream_id.toString() && item.type === 'movie'
+              );
+              
+              return {
+                ...movie,
+                isFavorite: favorites.some(fav => 
+                  fav.id === movie.stream_id.toString() && fav.type === 'movie'
+                ),
+                watchProgress: watchProgress || null,
+              };
+            });
+            
+            setMovies(selectedCategory, enhancedMovies);
+            setLoadingMovies(false);
+          }
         }
       } catch (error) {
         console.error('Error loading movies:', error);
@@ -136,7 +138,7 @@ export default function MoviesPage() {
     loadMovies();
   }, [
     selectedCategory, 
-    movies.length, 
+    movies, 
     isLoadingMovies, 
     setMovies, 
     setLoadingMovies,
@@ -146,7 +148,12 @@ export default function MoviesPage() {
   
   // Filter and sort movies
   useEffect(() => {
-    let filtered = [...movies];
+    if (!movies[selectedCategory]) {
+      setFilteredMovies([]);
+      return;
+    }
+    
+    let filtered = [...(movies[selectedCategory] as EnhancedMovie[])];
     
     // Apply search filter
     if (searchQuery.trim() !== '') {
@@ -185,7 +192,7 @@ export default function MoviesPage() {
     });
     
     setFilteredMovies(filtered);
-  }, [searchQuery, sortBy, sortOrder, movies]);
+  }, [searchQuery, sortBy, sortOrder, movies, selectedCategory]);
   
   // Handle category change
   const handleCategoryChange = (value: string) => {
