@@ -21,8 +21,8 @@ import { Search, SortAsc, SortDesc } from 'lucide-react';
 import { EnhancedSeries } from '@/app/lib/types/app';
 
 export default function SeriesCategoryPage({ params }: { params: { id: string } }) {
-  // Use React.use to unwrap params
-  const categoryId = React.use(Promise.resolve(params.id));
+  // Access params directly for now, but in a way that's compatible with future Next.js versions
+  const categoryId = params.id;
   const router = useRouter();
   const { checkSession } = useAuth();
   const { 
