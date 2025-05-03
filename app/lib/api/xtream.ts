@@ -48,14 +48,10 @@ class XtreamService {
     this.username = username;
     this.password = password;
     
-    // Use mock API if in development mode or if NEXT_PUBLIC_USE_MOCK_API is true
-    if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_USE_MOCK_API === 'true') {
-      console.log('Using mock API');
-      this.baseUrl = '/api/mock';
-    } else {
-      // Remove trailing slash if present
-      this.baseUrl = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
-    }
+    // Remove trailing slash if present
+    this.baseUrl = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
+    
+    console.log('Using server URL:', this.baseUrl);
   }
 
   /**

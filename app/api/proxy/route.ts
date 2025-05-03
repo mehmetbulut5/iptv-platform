@@ -9,10 +9,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'URL parameter is required' }, { status: 400 });
   }
 
-  // Check if the URL is pointing to our mock API
-  if (url.includes('/api/mock')) {
-    return redirectToMockApi(request, url);
-  }
+  // No automatic redirection to mock API
 
   try {
     console.log('Proxying request to:', url);
