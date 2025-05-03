@@ -95,7 +95,7 @@ export function useAuth() {
       const userInfoResponse = await xtreamService.authenticate();
       
       // Check if authentication was successful
-      if (userInfoResponse.user_info.auth !== 1) {
+      if (!userInfoResponse.user_info || userInfoResponse.user_info.auth !== 1) {
         throw new Error('Authentication failed: Invalid credentials');
       }
       
