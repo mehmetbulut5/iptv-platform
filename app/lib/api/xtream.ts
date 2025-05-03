@@ -25,8 +25,15 @@ class XtreamService {
   setCredentials(credentials: XtreamCredentials): void {
     const { serverUrl, username, password } = credentials;
     
-    // Remove trailing slash if present
-    this.baseUrl = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
+    // In development mode, use our mock API
+    if (process.env.NODE_ENV === 'development' && 
+        (serverUrl === 'http://example.com:8080' || serverUrl.includes('localhost'))) {
+      this.baseUrl = '/api/mock';
+    } else {
+      // Remove trailing slash if present
+      this.baseUrl = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
+    }
+    
     this.username = username;
     this.password = password;
   }
@@ -101,7 +108,7 @@ class XtreamService {
   /**
    * Get live streams by category
    */
-  async getLiveStreamsByCategory(categoryId: string): Promise<XtreamLiveStream[]> {
+  async getLiveStreamsByCategory(categoryId: number | string): Promise<XtreamLiveStream[]> {
     if (!this.hasCredentials()) {
       throw new Error('Credentials not set');
     }

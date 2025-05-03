@@ -13,8 +13,8 @@ import { Search } from 'lucide-react';
 import { EnhancedLiveStream } from '@/app/lib/types/app';
 
 export default function LiveTVCategoryPage({ params }: { params: { id: string } }) {
-  // Access params directly for now, but in a way that's compatible with future Next.js versions
-  const categoryId = params.id;
+  // Use React.use to unwrap params
+  const categoryId = React.use(Promise.resolve(params.id));
   const router = useRouter();
   const { checkSession } = useAuth();
   const { 
@@ -77,8 +77,9 @@ export default function LiveTVCategoryPage({ params }: { params: { id: string } 
     } else {
       setFilteredStreams(liveStreams[categoryId] as EnhancedLiveStream[]);
     }
+  // Deliberately omit checkSession from dependencies to prevent infinite loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    checkSession, 
     router, 
     categoryId, 
     liveCategories, 

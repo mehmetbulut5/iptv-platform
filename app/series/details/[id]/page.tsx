@@ -34,6 +34,9 @@ interface SeriesDetailsPageProps {
 }
 
 export default function SeriesDetailsPage({ params }: SeriesDetailsPageProps) {
+  // Use React.use to unwrap params
+  const seriesId = React.use(Promise.resolve(params.id));
+  
   const router = useRouter();
   const { checkSession } = useAuth();
   const { 
@@ -52,7 +55,7 @@ export default function SeriesDetailsPage({ params }: SeriesDetailsPageProps) {
   
   // Check if the series is in favorites
   const isFavorite = favorites.some(
-    fav => fav.id === params.id && fav.type === 'series'
+    fav => fav.id === seriesId && fav.type === 'series'
   );
   
   // Check if user is authenticated
@@ -69,8 +72,10 @@ export default function SeriesDetailsPage({ params }: SeriesDetailsPageProps) {
         setIsLoading(true);
         
         // Check if the series is already in the store
-        const existingSeries = series.find(
-          s => s.series_id.toString() === params.id
+        // First, create an array of all series from all categories
+        const allSeries = Object.values(series).flat();
+        const existingSeries = allSeries.find(
+          (s: any) => s.series_id?.toString() === seriesId
         );
         
         if (existingSeries) {
@@ -81,7 +86,7 @@ export default function SeriesDetailsPage({ params }: SeriesDetailsPageProps) {
             // Find the season with the most recent watch progress
             const watchedSeasons = watchHistory
               .filter(item => 
-                item.id === params.id && 
+                item.id === seriesId && 
                 item.type === 'series' && 
                 item.seasonNumber !== undefined
               )
@@ -107,7 +112,7 @@ export default function SeriesDetailsPage({ params }: SeriesDetailsPageProps) {
           }
         } else {
           // Fetch the series from the API
-          const seriesData = await xtreamService.getSeriesById(parseInt(params.id));
+          const seriesData = await xtreamService.getSeriesById(parseInt(seriesId));
           
           if (seriesData) {
             // Find all watch history items for this series

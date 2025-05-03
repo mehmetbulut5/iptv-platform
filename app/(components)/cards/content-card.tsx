@@ -171,7 +171,9 @@ export function ContentCard({
       {/* Poster Image */}
       <div className="relative h-full w-full">
         <Image
-          src={posterUrl || '/placeholder-poster.jpg'}
+          src={posterUrl && (posterUrl.startsWith('http://') || posterUrl.startsWith('https://')) 
+            ? posterUrl 
+            : '/placeholder-poster.jpg'}
           alt={title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"

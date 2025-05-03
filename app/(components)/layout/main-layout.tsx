@@ -46,6 +46,8 @@ export function MainLayout({ children }: MainLayoutProps) {
     if (!isSessionValid && pathname !== '/auth/login') {
       router.push('/auth/login');
     }
+  // Deliberately omit checkSession from dependencies to prevent infinite loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, router]);
   
   // Get current tab value based on pathname

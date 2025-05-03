@@ -41,6 +41,8 @@ export function useAuth() {
         router.push('/auth/login');
       }
     }
+  // Deliberately omit checkSession from dependencies to prevent infinite loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitialized, router]);
   
   /**
