@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 import { MainLayout } from '@/app/(components)/layout/main-layout';
 import { useAuth } from '@/app/hooks/use-auth';
 import { useContentStore } from '@/app/lib/store/content-store';
@@ -20,6 +21,8 @@ import { Search, SortAsc, SortDesc } from 'lucide-react';
 import { EnhancedMovie } from '@/app/lib/types/app';
 
 export default function MovieCategoryPage({ params }: { params: { id: string } }) {
+  // Use React.use to unwrap params
+  const categoryId = React.use(Promise.resolve(params.id));
   const router = useRouter();
   const { checkSession } = useAuth();
   const { 
@@ -47,7 +50,7 @@ export default function MovieCategoryPage({ params }: { params: { id: string } }
     }
     
     // Find category name
-    const category = movieCategories.find(c => c.category_id.toString() === params.id);
+    const category = movieCategories.find(c => c.category_id.toString() === categoryId);
     if (category) {
       setCategoryName(category.category_name);
     }
@@ -56,8 +59,8 @@ export default function MovieCategoryPage({ params }: { params: { id: string } }
     const loadMovies = async () => {
       try {
         setLoadingMovies(true);
-        const categoryId = parseInt(params.id);
-        const moviesData = await xtreamService.getMoviesByCategory(categoryId);
+        const catId = parseInt(categoryId);
+        const moviesData = await xtreamService.getMoviesByCategory(catId);
         
         // Enhance movies with favorite status and watch progress
         const enhancedMovies: EnhancedMovie[] = moviesData.map(movie => {
@@ -80,7 +83,7 @@ export default function MovieCategoryPage({ params }: { params: { id: string } }
           };
         });
         
-        setMovies(params.id, enhancedMovies);
+        setMovies(categoryId, enhancedMovies);
         setFilteredMovies(enhancedMovies);
         setLoadingMovies(false);
       } catch (error) {
@@ -90,15 +93,15 @@ export default function MovieCategoryPage({ params }: { params: { id: string } }
     };
     
     // Check if we already have movies for this category
-    if (!movies[params.id]) {
+    if (!movies[categoryId]) {
       loadMovies();
     } else {
-      setFilteredMovies(movies[params.id] as EnhancedMovie[]);
+      setFilteredMovies(movies[categoryId] as EnhancedMovie[]);
     }
   }, [
     checkSession, 
     router, 
-    params.id, 
+    categoryId, 
     movieCategories, 
     movies,
     setMovies, 
@@ -109,9 +112,9 @@ export default function MovieCategoryPage({ params }: { params: { id: string } }
   
   // Filter and sort movies
   useEffect(() => {
-    if (!movies[params.id]) return;
+    if (!movies[categoryId]) return;
     
-    let filtered = [...(movies[params.id] as EnhancedMovie[])];
+    let filtered = [...(movies[categoryId] as EnhancedMovie[])];
     
     // Apply search filter
     if (searchQuery.trim() !== '') {
@@ -150,7 +153,7 @@ export default function MovieCategoryPage({ params }: { params: { id: string } }
     });
     
     setFilteredMovies(filtered);
-  }, [searchQuery, sortBy, sortOrder, movies, params.id]);
+  }, [searchQuery, sortBy, sortOrder, movies, categoryId]);
   
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

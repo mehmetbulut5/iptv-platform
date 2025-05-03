@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 import { MainLayout } from '@/app/(components)/layout/main-layout';
 import { useAuth } from '@/app/hooks/use-auth';
 import { useContentStore } from '@/app/lib/store/content-store';
@@ -12,6 +13,8 @@ import { Search } from 'lucide-react';
 import { EnhancedLiveStream } from '@/app/lib/types/app';
 
 export default function LiveTVCategoryPage({ params }: { params: { id: string } }) {
+  // Use React.use to unwrap params
+  const categoryId = React.use(Promise.resolve(params.id));
   const router = useRouter();
   const { checkSession } = useAuth();
   const { 
@@ -36,7 +39,7 @@ export default function LiveTVCategoryPage({ params }: { params: { id: string } 
     }
     
     // Find category name
-    const category = liveCategories.find(c => c.category_id.toString() === params.id);
+    const category = liveCategories.find(c => c.category_id.toString() === categoryId);
     if (category) {
       setCategoryName(category.category_name);
     }
@@ -45,8 +48,8 @@ export default function LiveTVCategoryPage({ params }: { params: { id: string } 
     const loadStreams = async () => {
       try {
         setLoadingLiveStreams(true);
-        const categoryId = parseInt(params.id);
-        const streams = await xtreamService.getLiveStreamsByCategory(categoryId);
+        const catId = parseInt(categoryId);
+        const streams = await xtreamService.getLiveStreamsByCategory(catId);
         
         // Enhance streams with favorite status
         const enhancedStreams: EnhancedLiveStream[] = streams.map(stream => ({
@@ -59,7 +62,7 @@ export default function LiveTVCategoryPage({ params }: { params: { id: string } 
           nextProgram: null,
         }));
         
-        setLiveStreams(params.id, enhancedStreams);
+        setLiveStreams(categoryId, enhancedStreams);
         setFilteredStreams(enhancedStreams);
         setLoadingLiveStreams(false);
       } catch (error) {
@@ -69,15 +72,15 @@ export default function LiveTVCategoryPage({ params }: { params: { id: string } 
     };
     
     // Check if we already have streams for this category
-    if (!liveStreams[params.id]) {
+    if (!liveStreams[categoryId]) {
       loadStreams();
     } else {
-      setFilteredStreams(liveStreams[params.id] as EnhancedLiveStream[]);
+      setFilteredStreams(liveStreams[categoryId] as EnhancedLiveStream[]);
     }
   }, [
     checkSession, 
     router, 
-    params.id, 
+    categoryId, 
     liveCategories, 
     liveStreams,
     setLiveStreams, 
@@ -87,19 +90,19 @@ export default function LiveTVCategoryPage({ params }: { params: { id: string } 
   
   // Filter streams based on search query
   useEffect(() => {
-    if (!liveStreams[params.id]) return;
+    if (!liveStreams[categoryId]) return;
     
     if (searchQuery.trim() === '') {
-      setFilteredStreams(liveStreams[params.id] as EnhancedLiveStream[]);
+      setFilteredStreams(liveStreams[categoryId] as EnhancedLiveStream[]);
     } else {
       const query = searchQuery.toLowerCase();
-      const streams = liveStreams[params.id] as EnhancedLiveStream[];
+      const streams = liveStreams[categoryId] as EnhancedLiveStream[];
       const filtered = streams.filter(stream => 
         stream.name.toLowerCase().includes(query)
       );
       setFilteredStreams(filtered);
     }
-  }, [searchQuery, liveStreams, params.id]);
+  }, [searchQuery, liveStreams, categoryId]);
   
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

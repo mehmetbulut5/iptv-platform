@@ -129,7 +129,7 @@ class XtreamService {
   /**
    * Get all live streams
    */
-  async getAllLiveStreams(): Promise<XtreamLiveStream[]> {
+  async getLiveStreams(): Promise<XtreamLiveStream[]> {
     if (!this.hasCredentials()) {
       throw new Error('Credentials not set');
     }
@@ -211,7 +211,7 @@ class XtreamService {
   /**
    * Get all movies
    */
-  async getAllMovies(): Promise<XtreamMovie[]> {
+  async getMovies(): Promise<XtreamMovie[]> {
     if (!this.hasCredentials()) {
       throw new Error('Credentials not set');
     }
@@ -321,7 +321,7 @@ class XtreamService {
   /**
    * Get all series
    */
-  async getAllSeries(): Promise<XtreamSeries[]> {
+  async getSeries(): Promise<XtreamSeries[]> {
     if (!this.hasCredentials()) {
       throw new Error('Credentials not set');
     }
