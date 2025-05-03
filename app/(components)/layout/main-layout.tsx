@@ -46,7 +46,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     if (!isSessionValid && pathname !== '/auth/login') {
       router.push('/auth/login');
     }
-  }, [pathname, router, checkSession]);
+  }, [pathname, router]);
   
   // Get current tab value based on pathname
   const getCurrentTab = () => {

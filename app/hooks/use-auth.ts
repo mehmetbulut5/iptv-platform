@@ -27,24 +27,20 @@ export function useAuth() {
   
   // Check for existing session on initialization
   useEffect(() => {
-    const initializeAuth = async () => {
-      if (!isInitialized) {
-        const isValid = checkSession();
-        setIsInitialized(true);
-        
-        // If we're on the login page but have a valid session, redirect to home
-        if (isValid && window.location.pathname.includes('/auth/login')) {
-          router.push('/');
-        }
-        
-        // If we're not on the login page and don't have a valid session, redirect to login
-        if (!isValid && !window.location.pathname.includes('/auth/login')) {
-          router.push('/auth/login');
-        }
+    if (!isInitialized) {
+      const isValid = checkSession();
+      setIsInitialized(true);
+      
+      // If we're on the login page but have a valid session, redirect to home
+      if (isValid && window.location.pathname.includes('/auth/login')) {
+        router.push('/');
       }
-    };
-    
-    initializeAuth();
+      
+      // If we're not on the login page and don't have a valid session, redirect to login
+      if (!isValid && !window.location.pathname.includes('/auth/login')) {
+        router.push('/auth/login');
+      }
+    }
   }, [isInitialized, router]);
   
   /**
