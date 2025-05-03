@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 import { MainLayout } from '@/app/(components)/layout/main-layout';
 import { useAuth } from '@/app/hooks/use-auth';
 import { useContentStore } from '@/app/lib/store/content-store';
@@ -20,6 +21,8 @@ import { Search, SortAsc, SortDesc } from 'lucide-react';
 import { EnhancedSeries } from '@/app/lib/types/app';
 
 export default function SeriesCategoryPage({ params }: { params: { id: string } }) {
+  // Use React.use to unwrap params
+  const categoryId = React.use(Promise.resolve(params.id));
   const router = useRouter();
   const { checkSession } = useAuth();
   const { 
@@ -47,7 +50,7 @@ export default function SeriesCategoryPage({ params }: { params: { id: string } 
     }
     
     // Find category name
-    const category = seriesCategories.find(c => c.category_id.toString() === params.id);
+    const category = seriesCategories.find(c => c.category_id.toString() === categoryId);
     if (category) {
       setCategoryName(category.category_name);
     }
@@ -56,8 +59,8 @@ export default function SeriesCategoryPage({ params }: { params: { id: string } 
     const loadSeries = async () => {
       try {
         setLoadingSeries(true);
-        const categoryId = parseInt(params.id);
-        const seriesData = await xtreamService.getSeriesByCategory(categoryId);
+        const catId = parseInt(categoryId);
+        const seriesData = await xtreamService.getSeriesByCategory(catId);
         
         // Enhance series with favorite status and watch progress
         const enhancedSeries: EnhancedSeries[] = seriesData.map(show => {
@@ -93,7 +96,7 @@ export default function SeriesCategoryPage({ params }: { params: { id: string } 
           };
         });
         
-        setSeries(params.id, enhancedSeries);
+        setSeries(categoryId, enhancedSeries);
         setFilteredSeries(enhancedSeries);
         setLoadingSeries(false);
       } catch (error) {
@@ -103,15 +106,15 @@ export default function SeriesCategoryPage({ params }: { params: { id: string } 
     };
     
     // Check if we already have series for this category
-    if (!series[params.id]) {
+    if (!series[categoryId]) {
       loadSeries();
     } else {
-      setFilteredSeries(series[params.id] as EnhancedSeries[]);
+      setFilteredSeries(series[categoryId] as EnhancedSeries[]);
     }
   }, [
     checkSession, 
     router, 
-    params.id, 
+    categoryId, 
     seriesCategories, 
     series,
     setSeries, 
@@ -122,9 +125,9 @@ export default function SeriesCategoryPage({ params }: { params: { id: string } 
   
   // Filter and sort series
   useEffect(() => {
-    if (!series[params.id]) return;
+    if (!series[categoryId]) return;
     
-    let filtered = [...(series[params.id] as EnhancedSeries[])];
+    let filtered = [...(series[categoryId] as EnhancedSeries[])];
     
     // Apply search filter
     if (searchQuery.trim() !== '') {
@@ -163,7 +166,7 @@ export default function SeriesCategoryPage({ params }: { params: { id: string } 
     });
     
     setFilteredSeries(filtered);
-  }, [searchQuery, sortBy, sortOrder, series, params.id]);
+  }, [searchQuery, sortBy, sortOrder, series, categoryId]);
   
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
