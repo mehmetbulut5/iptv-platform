@@ -44,9 +44,9 @@ class XtreamService {
   setCredentials(credentials: XtreamCredentials): void {
     const { serverUrl, username, password } = credentials;
     
-    // In development mode, use our mock API
-    if (process.env.NODE_ENV === 'development' && 
-        (serverUrl === 'http://example.com:8080' || serverUrl.includes('localhost'))) {
+    // Always use mock API in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode: Using mock API');
       this.baseUrl = '/api/mock';
     } else {
       // Remove trailing slash if present

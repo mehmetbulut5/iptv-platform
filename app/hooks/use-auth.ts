@@ -53,34 +53,92 @@ export function useAuth() {
     setError(null);
     
     try {
-      // Set credentials in the service
-      xtreamService.setCredentials(credentials);
-      
-      // Authenticate with the API
-      const userInfoResponse = await xtreamService.authenticate();
-      
-      // Check if authentication was successful
-      if (userInfoResponse.user_info.auth !== 1) {
-        throw new Error('Authentication failed: Invalid credentials');
+      // In development mode, always use mock data
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Using mock data for authentication in development mode');
+        
+        // Create a mock user info response
+        const mockUserInfo = {
+          user_info: {
+            username: credentials.username,
+            password: credentials.password,
+            message: 'Welcome to IPTV Platform',
+            auth: 1,
+            status: 'Active',
+            exp_date: '2025-12-31',
+            is_trial: 0,
+            active_cons: 1,
+            created_at: '2023-01-01',
+            max_connections: 1,
+            allowed_output_formats: ['m3u8', 'ts', 'rtmp']
+          },
+          server_info: {
+            url: credentials.serverUrl,
+            port: '8080',
+            https_port: '443',
+            server_protocol: 'http',
+            rtmp_port: '1935',
+            timezone: 'Europe/London',
+            timestamp_now: Math.floor(Date.now() / 1000),
+            time_now: new Date().toISOString()
+          }
+        };
+        
+        // Create session
+        const newSession: UserSession = {
+          serverUrl: credentials.serverUrl,
+          username: credentials.username,
+          password: credentials.password,
+          expiresAt: '2025-12-31',
+          isActive: true,
+        };
+        
+        // Set credentials in the service (this will use the mock API)
+        xtreamService.setCredentials({
+          serverUrl: '/api/mock', // Use our mock API
+          username: credentials.username,
+          password: credentials.password,
+        });
+        
+        // Store session and user info
+        setSession(newSession);
+        setUserInfo(mockUserInfo);
+        
+        // Redirect to home page
+        router.push('/');
+        
+        return true;
+      } else {
+        // Production mode - use real API
+        // Set credentials in the service
+        xtreamService.setCredentials(credentials);
+        
+        // Authenticate with the API
+        const userInfoResponse = await xtreamService.authenticate();
+        
+        // Check if authentication was successful
+        if (userInfoResponse.user_info.auth !== 1) {
+          throw new Error('Authentication failed: Invalid credentials');
+        }
+        
+        // Create session
+        const newSession: UserSession = {
+          serverUrl: credentials.serverUrl,
+          username: credentials.username,
+          password: credentials.password,
+          expiresAt: userInfoResponse.user_info.exp_date,
+          isActive: true,
+        };
+        
+        // Store session and user info
+        setSession(newSession);
+        setUserInfo(userInfoResponse);
+        
+        // Redirect to home page
+        router.push('/');
+        
+        return true;
       }
-      
-      // Create session
-      const newSession: UserSession = {
-        serverUrl: credentials.serverUrl,
-        username: credentials.username,
-        password: credentials.password,
-        expiresAt: userInfoResponse.user_info.exp_date,
-        isActive: true,
-      };
-      
-      // Store session and user info
-      setSession(newSession);
-      setUserInfo(userInfoResponse);
-      
-      // Redirect to home page
-      router.push('/');
-      
-      return true;
     } catch (err) {
       console.error('Login error:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -117,12 +175,21 @@ export function useAuth() {
       }
     }
     
-    // Set credentials in the service
-    xtreamService.setCredentials({
-      serverUrl: session.serverUrl,
-      username: session.username,
-      password: session.password,
-    });
+    // In development mode, always use mock API
+    if (process.env.NODE_ENV === 'development') {
+      xtreamService.setCredentials({
+        serverUrl: '/api/mock', // Use our mock API
+        username: session.username,
+        password: session.password,
+      });
+    } else {
+      // Production mode - use real API
+      xtreamService.setCredentials({
+        serverUrl: session.serverUrl,
+        username: session.username,
+        password: session.password,
+      });
+    }
     
     return true;
   };
