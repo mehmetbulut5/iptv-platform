@@ -78,7 +78,7 @@ export default function LiveTVPage() {
       try {
         if (selectedCategory === 'all') {
           // Load all streams if not already loaded
-          if (liveStreams.length === 0 && !isLoadingLiveStreams) {
+          if (!liveStreams['all'] && !isLoadingLiveStreams) {
             setLoadingLiveStreams(true);
             const streams = await xtreamService.getLiveStreams();
             
@@ -93,28 +93,30 @@ export default function LiveTVPage() {
               nextProgram: null,
             }));
             
-            setLiveStreams(enhancedStreams);
+            setLiveStreams('all', enhancedStreams);
             setLoadingLiveStreams(false);
           }
         } else {
           // Load streams for selected category
-          setLoadingLiveStreams(true);
-          const categoryId = parseInt(selectedCategory);
-          const streams = await xtreamService.getLiveStreamsByCategory(categoryId);
-          
-          // Enhance streams with favorite status
-          const enhancedStreams: EnhancedLiveStream[] = streams.map(stream => ({
-            ...stream,
-            isFavorite: favorites.some(fav => 
-              fav.id === stream.stream_id.toString() && fav.type === 'live'
-            ),
-            // We'll add EPG data later
-            currentProgram: null,
-            nextProgram: null,
-          }));
-          
-          setLiveStreams(enhancedStreams);
-          setLoadingLiveStreams(false);
+          if (!liveStreams[selectedCategory]) {
+            setLoadingLiveStreams(true);
+            const categoryId = parseInt(selectedCategory);
+            const streams = await xtreamService.getLiveStreamsByCategory(categoryId);
+            
+            // Enhance streams with favorite status
+            const enhancedStreams: EnhancedLiveStream[] = streams.map(stream => ({
+              ...stream,
+              isFavorite: favorites.some(fav => 
+                fav.id === stream.stream_id.toString() && fav.type === 'live'
+              ),
+              // We'll add EPG data later
+              currentProgram: null,
+              nextProgram: null,
+            }));
+            
+            setLiveStreams(selectedCategory, enhancedStreams);
+            setLoadingLiveStreams(false);
+          }
         }
       } catch (error) {
         console.error('Error loading live streams:', error);
@@ -125,7 +127,7 @@ export default function LiveTVPage() {
     loadStreams();
   }, [
     selectedCategory, 
-    liveStreams.length, 
+    liveStreams, 
     isLoadingLiveStreams, 
     setLiveStreams, 
     setLoadingLiveStreams,
@@ -134,16 +136,23 @@ export default function LiveTVPage() {
   
   // Filter streams based on search query
   useEffect(() => {
+    if (!liveStreams[selectedCategory]) {
+      setFilteredStreams([]);
+      return;
+    }
+    
+    const currentStreams = liveStreams[selectedCategory] as EnhancedLiveStream[];
+    
     if (searchQuery.trim() === '') {
-      setFilteredStreams(liveStreams);
+      setFilteredStreams(currentStreams);
     } else {
       const query = searchQuery.toLowerCase();
-      const filtered = liveStreams.filter(stream => 
+      const filtered = currentStreams.filter(stream => 
         stream.name.toLowerCase().includes(query)
       );
       setFilteredStreams(filtered);
     }
-  }, [searchQuery, liveStreams]);
+  }, [searchQuery, liveStreams, selectedCategory]);
   
   // Handle category change
   const handleCategoryChange = (value: string) => {

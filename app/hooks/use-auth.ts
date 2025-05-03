@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/app/lib/store/auth-store';
 import { useContentStore } from '@/app/lib/store/content-store';
@@ -10,6 +10,7 @@ export function useAuth() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // Auth store
   const { 
@@ -23,6 +24,28 @@ export function useAuth() {
   
   // Content store
   const { clearAllContent } = useContentStore();
+  
+  // Check for existing session on initialization
+  useEffect(() => {
+    const initializeAuth = async () => {
+      if (!isInitialized) {
+        const isValid = checkSession();
+        setIsInitialized(true);
+        
+        // If we're on the login page but have a valid session, redirect to home
+        if (isValid && window.location.pathname.includes('/auth/login')) {
+          router.push('/');
+        }
+        
+        // If we're not on the login page and don't have a valid session, redirect to login
+        if (!isValid && !window.location.pathname.includes('/auth/login')) {
+          router.push('/auth/login');
+        }
+      }
+    };
+    
+    initializeAuth();
+  }, [isInitialized, router]);
   
   /**
    * Login with Xtream Codes credentials

@@ -81,7 +81,7 @@ export default function SeriesPage() {
       try {
         if (selectedCategory === 'all') {
           // Load all series if not already loaded
-          if (series.length === 0 && !isLoadingSeries) {
+          if (!series['all'] && !isLoadingSeries) {
             setLoadingSeries(true);
             const seriesData = await xtreamService.getSeries();
             
@@ -119,51 +119,53 @@ export default function SeriesPage() {
               };
             });
             
-            setSeries(enhancedSeries);
+            setSeries('all', enhancedSeries);
             setLoadingSeries(false);
           }
         } else {
           // Load series for selected category
-          setLoadingSeries(true);
-          const categoryId = parseInt(selectedCategory);
-          const seriesData = await xtreamService.getSeriesByCategory(categoryId);
-          
-          // Enhance series with favorite status and watch progress
-          const enhancedSeries: EnhancedSeries[] = seriesData.map(show => {
-            // Find all watch history items for this series
-            const seriesWatchHistory = watchHistory.filter(
-              item => item.id === show.series_id.toString() && item.type === 'series'
-            );
+          if (!series[selectedCategory]) {
+            setLoadingSeries(true);
+            const categoryId = parseInt(selectedCategory);
+            const seriesData = await xtreamService.getSeriesByCategory(categoryId);
             
-            // Calculate overall progress if there are watch history items
-            let watchProgress = null;
-            if (seriesWatchHistory.length > 0) {
-              // This is a simplified calculation - in a real app, you'd need to count total episodes
-              const latestWatched = seriesWatchHistory.reduce((latest, current) => {
-                return new Date(current.lastWatched) > new Date(latest.lastWatched) ? current : latest;
-              });
+            // Enhance series with favorite status and watch progress
+            const enhancedSeries: EnhancedSeries[] = seriesData.map(show => {
+              // Find all watch history items for this series
+              const seriesWatchHistory = watchHistory.filter(
+                item => item.id === show.series_id.toString() && item.type === 'series'
+              );
               
-              watchProgress = {
-                progress: latestWatched.progress,
-                position: latestWatched.position,
-                duration: latestWatched.duration,
-                lastWatched: latestWatched.lastWatched,
-                seasonNumber: latestWatched.seasonNumber,
-                episodeNumber: latestWatched.episodeNumber,
+              // Calculate overall progress if there are watch history items
+              let watchProgress = null;
+              if (seriesWatchHistory.length > 0) {
+                // This is a simplified calculation - in a real app, you'd need to count total episodes
+                const latestWatched = seriesWatchHistory.reduce((latest, current) => {
+                  return new Date(current.lastWatched) > new Date(latest.lastWatched) ? current : latest;
+                });
+                
+                watchProgress = {
+                  progress: latestWatched.progress,
+                  position: latestWatched.position,
+                  duration: latestWatched.duration,
+                  lastWatched: latestWatched.lastWatched,
+                  seasonNumber: latestWatched.seasonNumber,
+                  episodeNumber: latestWatched.episodeNumber,
+                };
+              }
+              
+              return {
+                ...show,
+                isFavorite: favorites.some(fav => 
+                  fav.id === show.series_id.toString() && fav.type === 'series'
+                ),
+                watchProgress: watchProgress,
               };
-            }
+            });
             
-            return {
-              ...show,
-              isFavorite: favorites.some(fav => 
-                fav.id === show.series_id.toString() && fav.type === 'series'
-              ),
-              watchProgress: watchProgress,
-            };
-          });
-          
-          setSeries(enhancedSeries);
-          setLoadingSeries(false);
+            setSeries(selectedCategory, enhancedSeries);
+            setLoadingSeries(false);
+          }
         }
       } catch (error) {
         console.error('Error loading series:', error);
@@ -174,7 +176,7 @@ export default function SeriesPage() {
     loadSeries();
   }, [
     selectedCategory, 
-    series.length, 
+    series, 
     isLoadingSeries, 
     setSeries, 
     setLoadingSeries,
@@ -184,7 +186,12 @@ export default function SeriesPage() {
   
   // Filter and sort series
   useEffect(() => {
-    let filtered = [...series];
+    if (!series[selectedCategory]) {
+      setFilteredSeries([]);
+      return;
+    }
+    
+    let filtered = [...(series[selectedCategory] as EnhancedSeries[])];
     
     // Apply search filter
     if (searchQuery.trim() !== '') {
@@ -223,7 +230,7 @@ export default function SeriesPage() {
     });
     
     setFilteredSeries(filtered);
-  }, [searchQuery, sortBy, sortOrder, series]);
+  }, [searchQuery, sortBy, sortOrder, series, selectedCategory]);
   
   // Handle category change
   const handleCategoryChange = (value: string) => {
