@@ -18,6 +18,25 @@ class XtreamService {
   private password: string = '';
 
   constructor() {}
+  
+  /**
+   * Helper method to create a proxy URL for API requests
+   */
+  private createProxyUrl(action?: string, params?: Record<string, any>): string {
+    // Start with the base parameters
+    const queryParams = new URLSearchParams({
+      username: this.username,
+      password: this.password,
+      ...(action ? { action } : {}),
+      ...(params || {})
+    });
+    
+    // Create the target URL
+    const targetUrl = `${this.baseUrl}/player_api.php?${queryParams.toString()}`;
+    
+    // Return the proxied URL
+    return `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
+  }
 
   /**
    * Set the credentials for the Xtream Codes API
@@ -61,16 +80,10 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamUserInfo>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl();
+      console.log('Authentication URL:', proxyUrl);
+      
+      const response = await axios.get<XtreamUserInfo>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error('Authentication error:', error);
@@ -87,17 +100,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamLiveCategory[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_live_categories',
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_live_categories');
+      const response = await axios.get<XtreamLiveCategory[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error('Error fetching live categories:', error);
@@ -114,18 +118,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamLiveStream[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_live_streams',
-            category_id: categoryId,
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_live_streams', { category_id: categoryId });
+      const response = await axios.get<XtreamLiveStream[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error(`Error fetching live streams for category ${categoryId}:`, error);
@@ -142,17 +136,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamLiveStream[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_live_streams',
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_live_streams');
+      const response = await axios.get<XtreamLiveStream[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error('Error fetching all live streams:', error);
@@ -169,17 +154,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamMovieCategory[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_vod_categories',
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_vod_categories');
+      const response = await axios.get<XtreamMovieCategory[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error('Error fetching movie categories:', error);
@@ -196,18 +172,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamMovie[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_vod_streams',
-            category_id: categoryId,
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_vod_streams', { category_id: categoryId });
+      const response = await axios.get<XtreamMovie[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error(`Error fetching movies for category ${categoryId}:`, error);
@@ -224,17 +190,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamMovie[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_vod_streams',
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_vod_streams');
+      const response = await axios.get<XtreamMovie[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error('Error fetching all movies:', error);
@@ -251,18 +208,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamMovie>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_vod_info',
-            vod_id: movieId,
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_vod_info', { vod_id: movieId });
+      const response = await axios.get<XtreamMovie>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error(`Error fetching movie info for ID ${movieId}:`, error);
@@ -279,17 +226,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamSeriesCategory[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_series_categories',
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_series_categories');
+      const response = await axios.get<XtreamSeriesCategory[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error('Error fetching series categories:', error);
@@ -306,18 +244,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamSeries[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_series',
-            category_id: categoryId,
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_series', { category_id: categoryId });
+      const response = await axios.get<XtreamSeries[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error(`Error fetching series for category ${categoryId}:`, error);
@@ -334,17 +262,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamSeries[]>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_series',
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_series');
+      const response = await axios.get<XtreamSeries[]>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error('Error fetching all series:', error);
@@ -361,18 +280,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamSeriesInfo>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_series_info',
-            series_id: seriesId,
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_series_info', { series_id: seriesId });
+      const response = await axios.get<XtreamSeriesInfo>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error(`Error fetching series info for ID ${seriesId}:`, error);
@@ -389,18 +298,8 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamEPG>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_short_epg',
-            stream_id: streamId,
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_short_epg', { stream_id: streamId });
+      const response = await axios.get<XtreamEPG>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error(`Error fetching EPG for stream ID ${streamId}:`, error);
@@ -417,19 +316,11 @@ class XtreamService {
     }
 
     try {
-      const response = await axios.get<XtreamEPG>(
-        `${this.baseUrl}/player_api.php`,
-        {
-          params: {
-            username: this.username,
-            password: this.password,
-            action: 'get_short_epg',
-            stream_id: streamId,
-            limit: limit,
-          },
-        }
-      );
-
+      const proxyUrl = this.createProxyUrl('get_short_epg', { 
+        stream_id: streamId,
+        limit: limit 
+      });
+      const response = await axios.get<XtreamEPG>(proxyUrl);
       return response.data;
     } catch (error) {
       console.error(`Error fetching EPG for stream ID ${streamId} with limit ${limit}:`, error);
@@ -445,7 +336,8 @@ class XtreamService {
       throw new Error('Credentials not set');
     }
 
-    return `${this.baseUrl}/live/${this.username}/${this.password}/${streamId}.m3u8`;
+    const directUrl = `${this.baseUrl}/live/${this.username}/${this.password}/${streamId}.m3u8`;
+    return `/api/proxy?url=${encodeURIComponent(directUrl)}`;
   }
 
   /**
@@ -456,7 +348,8 @@ class XtreamService {
       throw new Error('Credentials not set');
     }
 
-    return `${this.baseUrl}/movie/${this.username}/${this.password}/${movieId}.${extension}`;
+    const directUrl = `${this.baseUrl}/movie/${this.username}/${this.password}/${movieId}.${extension}`;
+    return `/api/proxy?url=${encodeURIComponent(directUrl)}`;
   }
 
   /**
@@ -467,7 +360,8 @@ class XtreamService {
       throw new Error('Credentials not set');
     }
 
-    return `${this.baseUrl}/series/${this.username}/${this.password}/${episodeId}.${extension}`;
+    const directUrl = `${this.baseUrl}/series/${this.username}/${this.password}/${episodeId}.${extension}`;
+    return `/api/proxy?url=${encodeURIComponent(directUrl)}`;
   }
 }
 
