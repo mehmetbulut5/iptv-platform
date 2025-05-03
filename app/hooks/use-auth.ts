@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/app/lib/store/auth-store';
+import { useContentStore } from '@/app/lib/store/content-store';
+import { xtreamService } from '@/app/lib/api/xtream';
+import { XtreamCredentials } from '@/app/lib/types/xtream';
+import { UserSession } from '@/app/lib/types/app';
+
+export function useAuth() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Auth store
+  const { 
+    session, 
+    userInfo, 
+    isAuthenticated, 
+    setSession, 
+    setUserInfo, 
+    clearSession 
+  } = useAuthStore();
+  
+  // Content store
+  const { clearAllContent } = useContentStore();
+  
+  /**
+   * Login with Xtream Codes credentials
+   */
+  const login = async (credentials: XtreamCredentials) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Set credentials in the service
+      xtreamService.setCredentials(credentials);
+      
+      // Authenticate with the API
+      const userInfoResponse = await xtreamService.authenticate();
+      
+      // Check if authentication was successful
+      if (userInfoResponse.user_info.auth !== 1) {
+        throw new Error('Authentication failed: Invalid credentials');
+      }
+      
+      // Create session
+      const newSession: UserSession = {
+        serverUrl: credentials.serverUrl,
+        username: credentials.username,
+        password: credentials.password,
+        expiresAt: userInfoResponse.user_info.exp_date,
+        isActive: true,
+      };
+      
+      // Store session and user info
+      setSession(newSession);
+      setUserInfo(userInfoResponse);
+      
+      // Redirect to home page
+      router.push('/');
+      
+      return true;
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  /**
+   * Logout and clear session
+   */
+  const logout = () => {
+    clearSession();
+    clearAllContent();
+    router.push('/auth/login');
+  };
+  
+  /**
+   * Check if the session is valid
+   */
+  const checkSession = (): boolean => {
+    if (!session || !isAuthenticated) {
+      return false;
+    }
+    
+    // Check if session is expired
+    if (session.expiresAt) {
+      const expiryDate = new Date(session.expiresAt);
+      if (expiryDate < new Date()) {
+        // Session expired
+        clearSession();
+        return false;
+      }
+    }
+    
+    // Set credentials in the service
+    xtreamService.setCredentials({
+      serverUrl: session.serverUrl,
+      username: session.username,
+      password: session.password,
+    });
+    
+    return true;
+  };
+  
+  return {
+    session,
+    userInfo,
+    isAuthenticated,
+    isLoading,
+    error,
+    login,
+    logout,
+    checkSession,
+  };
+}
